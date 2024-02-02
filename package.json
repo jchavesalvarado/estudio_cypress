@@ -1,0 +1,16 @@
+{
+  "name": "estudio_cypress",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Johan Chaves",
+  "license": "ISC",
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "cypress": "^13.6.4",
+    "oracledb": "^6.3.0"
+  }
+}
