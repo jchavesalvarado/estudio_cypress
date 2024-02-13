@@ -14,6 +14,8 @@ let categoriasInstructor = [];
 let categoriasCea = [];
 // Varaible que va a tomar como valor las categorías del instructor que no corresponden con las del CEA
 let categoriasQueNoCorresponden = [];
+let cantidadInicialDeRegistros;
+let cantidadFinalDeRegistros;
 // Schema del servicio coordinar validaciones vehículos
 const schema = {
     type: 'object', properties: {
@@ -75,6 +77,34 @@ export class ValidarLicenciaInstructor {
             tipoDocumento = registro.rows[0]['PERSONA_TIPOIDENT_IDTIPDOC'];
             numeroDocumento = registro.rows[0]['PERSONA_NRODOCUME'];
         })
+    }
+
+    static consultarCantidadInicialDeRegistrosTablaLog() {
+        cy.task('ejecutar_query_oracle', {
+            statement: `SELECT *
+                            FROM CSWHABILITACIONPNJ.GE_LOGVALIDA
+                            WHERE LOGVALIDA_TIPOVALID_CODVALIDA = 'CUR01515'
+                              AND TRUNC(LOGVALIDA_FECHORA) = TO_DATE(sysdate, 'DD/MM/YY')
+                            ORDER BY LOGVALIDA_FECHORA desc`
+        }).then(registros => {
+            cantidadInicialDeRegistros = registros.rows.length
+        })
+    }
+
+    static consultarCantidadFinalDeRegistrosTablaLog() {
+        cy.task('ejecutar_query_oracle', {
+            statement: `SELECT *
+                            FROM CSWHABILITACIONPNJ.GE_LOGVALIDA
+                            WHERE LOGVALIDA_TIPOVALID_CODVALIDA = 'CUR01515'
+                              AND TRUNC(LOGVALIDA_FECHORA) = TO_DATE(sysdate, 'DD/MM/YY')
+                            ORDER BY LOGVALIDA_FECHORA desc`
+        }).then(registros => {
+            cantidadFinalDeRegistros = registros.rows.length
+        })
+    }
+
+    static validarRegistroLogEnLaBaseDeDatos() {
+        expect(cantidadFinalDeRegistros).to.eq(cantidadInicialDeRegistros + 1, `Se registró correctamente el log en la base de datos correspondiente a la notificación CUR01515`)
     }
 
     // Consumo del servicio validar licencia instructor - Categorías no corresponden

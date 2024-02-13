@@ -10,6 +10,10 @@ Given("Que se tiene el tipo de documento, numero de documento y categoría de la
     ValidarLicenciaInstructor.consultarIntructorConLicenciaConduccion();
 });
 
+Given("Se revisa la tabla de donde se guarda el log para mirar la cantidad de registros antes de consumir el servicio", () => {
+    ValidarLicenciaInstructor.consultarCantidadInicialDeRegistrosTablaLog();
+});
+
 When("Se ejecuta el servicio validar licencia conduccion con el tipo de documento, número de documento y categoría de la licencia de conduccion", () => {
     ValidarLicenciaInstructor.consumirServicioValidarIntructor();
 });
@@ -24,6 +28,14 @@ Then("El mensaje de la causal de rechazo debe ser null", () => {
 
 Then("El esquema de la respuesta el servicio debe ser el correcto", () => {
     ValidarLicenciaInstructor.ValidarSchemaRespuesta();
+});
+
+Then("Se revisa la tabla de donde se guarda el log para mirar la cantidad de registros al consumir el servicio", () => {
+    ValidarLicenciaInstructor.consultarCantidadFinalDeRegistrosTablaLog();
+});
+
+Then("Se debe registrar correctamente el log del caso de uso en la base de datos", () => {
+    ValidarLicenciaInstructor.validarRegistroLogEnLaBaseDeDatos();
 });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
