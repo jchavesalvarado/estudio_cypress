@@ -28,6 +28,7 @@ module.exports = defineConfig({
         setupNodeEvents,
         specPattern: "cypress/e2e/**/*.feature",
         chromeWebSecurity: false,
+        taskTimeout: 1800000,
     },
     env: {
         DB_USER_DESARUNT: process.env.USER_DESARUNT,

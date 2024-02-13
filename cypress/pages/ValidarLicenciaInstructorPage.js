@@ -4,10 +4,16 @@ const Ajv = require("ajv");
 let numeroDocumento;
 // Variable que va a tomar como valor el tipo de documento de un instructor
 let tipoDocumento;
-// Variable que toma como valor la categoría asignada al instructor
+// Variable que toma como valor una de las categorías del instructor
 let categoriaLicencia;
 // Variable que va a tomar como valor la respuesta obtenida del servicio
 let respuesta;
+// Variable que va a tomar como valor todas las categorías del instructor
+let categoriasInstructor = [];
+// Variable que va a tomar como valor las categorías del CEA
+let categoriasCea = [];
+// Varaible que va a tomar como valor las categorías del instructor que no corresponden con las del CEA
+let categoriasQueNoCorresponden = [];
 // Schema del servicio coordinar validaciones vehículos
 const schema = {
     type: 'object', properties: {
@@ -22,45 +28,39 @@ const schema = {
 // Clase que contiene métodos necesarios para la validación del caso de uso CUR01515
 export class ValidarLicenciaInstructor {
 
-    // Consultando en la base de datos el instructor - Licencia activa y vigente
+    // Consultando instructor - Con licencia
     static consultarIntructorConLicenciaConduccion() {
-        return cy.task('ejecutar_query_oracle', {
-            statement: `SELECT DISTINCT
+        cy.task('ejecutar_query_oracle', {
+            statement: `
+        SELECT
             per.persona_idpersona              AS id_persona,
             per.persona_tipoident_idtipdoc     AS tipo_documento,
             per.persona_nrodocume              AS numero_documento,
-            licc.licecondu_nrolicenc           AS numero_licencia_conduccion,
-            licc.licecondu_fechexped           AS fecha_expedicion,
-            licc.licecondu_fechvenci           AS fecha_vencimiento,
-            licc.licecondu_estliccon_nombre    AS estado_licencia_conduccion,
-            licc.licecondu_categoria_idcategor AS categoria_licencia_conduccion,
-            cat.ceraptcon_categoria            AS cetificado_enseñanza
+            catl.catliccon_categoria_idcategor AS categoria,
+            licecondu_nrolicenc AS numero_licencia
         FROM
-                 runtprod.ev_liceinstr ins
-            INNER JOIN runtprod.tr_persnatur natur ON ( ins.liceinstr_persnatur_idpersona = natur.persnatur_persona_idpersona )
-            INNER JOIN runtprod.ev_licecondu licc ON ( ins.liceinstr_licecondu_nrolicenc = licc.licecondu_nrolicenc )
-            INNER JOIN runtprod.tr_persona   per ON ( natur.persnatur_persona_idpersona = per.persona_idpersona )
-            INNER JOIN runtprod.re_ceraptcon cat ON ( licc.licecondu_certensen_nrocerens = cat.ceraptcon_nrocertif )
+                 runtprod.tr_persona per
+            JOIN runtprod.ev_licecondu lic ON lic.licecondu_persnatur_idpersona = per.persona_idpersona
+            LEFT JOIN runtprod.rc_catliccon catl ON catl.catliccon_licecondu_nrolicenc = lic.licecondu_nrolicenc
         WHERE
-                ins.liceinstr_estliccon_nombinstr = 'ACTIVA'
-            AND licc.licecondu_estliccon_nombre = 'ACTIVA'
-            AND per.persona_estaperso_nombre = 'ACTIVA'
-            AND licc.licecondu_fechvenci > sysdate
-            AND cat.ceraptcon_categoria IS NOT NULL
-            AND licc.licecondu_categoria_idcategor IS NOT NULL
-            AND ROWNUM <= 1
-        ORDER BY
-            per.persona_idpersona`,
+            lic.licecondu_estliccon_nombre IN ( 'ACTIVA' )
+            AND ( lic.licecondu_fechvenci > sysdate
+                  OR catl.catliccon_fechvenci > sysdate )
+            AND catl.catliccon_categoria_idcategor IS NOT NULL
+            AND lic.licecondu_categoria_idcategor IS NOT NULL
+            AND ROWNUM <= 1`,
         }).then(registro => {
             tipoDocumento = registro.rows[0]['TIPO_DOCUMENTO'];
             numeroDocumento = registro.rows[0]['NUMERO_DOCUMENTO'];
-            categoriaLicencia = registro.rows[0]['CATEGORIA_LICENCIA_CONDUCCION'];
+            categoriaLicencia = registro.rows[0]['CATEGORIA'];
         })
     }
 
+    // Consultando instructor - Sin licencia
     static consultarIntructorSinLicenciaConduccion() {
-        return cy.task('ejecutar_query_oracle', {
-            statement: `SELECT
+        cy.task('ejecutar_query_oracle', {
+            statement: `
+        SELECT
             per.persona_tipoident_idtipdoc,
             per.persona_nrodocume
         FROM
@@ -74,35 +74,19 @@ export class ValidarLicenciaInstructor {
         }).then(registro => {
             tipoDocumento = registro.rows[0]['PERSONA_TIPOIDENT_IDTIPDOC'];
             numeroDocumento = registro.rows[0]['PERSONA_NRODOCUME'];
-            cy.log(registro.rows)
         })
     }
 
-    // Consumo del servicio coordinar validaciones vehículos - Sin licencia
-    static consumirServicioValidarInstructorSinLicencia() {
-        return cy.request({
-            method: 'POST',
-            url: 'https://az-hub-dev-apim-dev-cus-000.azure-api.net/OAValidacionesMS/validaciones/validarLicenciaConduccion',
-            body: {
-                "tipoDocumento": tipoDocumento,
-                "numeroDocumento": numeroDocumento,
-                "categoria": [categoriaLicencia],
-                "idSolicitud": 37
-            }
-        }).then(response => {
-            respuesta = response
-        })
-    }
-    
-    // Consumo del servicio coordinar validaciones vehículos - Sin licencia
+    // Consumo del servicio validar licencia instructor - Categorías no corresponden
     static consumirServicioValidarInstructorCategorias() {
-        return cy.request({
+        ValidarLicenciaInstructor.consultarCategoriasQueNoCorresponden();
+        cy.request({
             method: 'POST',
             url: 'https://az-hub-dev-apim-dev-cus-000.azure-api.net/OAValidacionesMS/validaciones/validarLicenciaConduccion',
             body: {
                 "tipoDocumento": tipoDocumento,
                 "numeroDocumento": numeroDocumento,
-                "categoria": ['H2'],
+                "categoria": categoriasQueNoCorresponden,
                 "idSolicitud": 37
             }
         }).then(response => {
@@ -110,9 +94,9 @@ export class ValidarLicenciaInstructor {
         })
     }
 
-    // Consumo del servicio coordinar validaciones vehículos - Con licencia
-    static consumirServicioValidarIntructorConLicencia() {
-        return cy.request({
+    // Consumo del servicio validar licencia instructor - Categorías corresponden
+    static consumirServicioValidarIntructor() {
+        cy.request({
             method: 'POST',
             url: 'https://az-hub-dev-apim-dev-cus-000.azure-api.net/OAValidacionesMS/validaciones/validarLicenciaConduccion',
             body: {
@@ -126,75 +110,111 @@ export class ValidarLicenciaInstructor {
         })
     }
 
-     // Consultando en la base de datos el instructor - Licencia no activa
+     // Consultando instructor - Licencia no activa
      static consultarIntructorConLicenciaConduccionNoActiva() {
-        return cy.task('ejecutar_query_oracle', {
-            statement: `SELECT DISTINCT
+        cy.task('ejecutar_query_oracle', {
+            statement: `
+        SELECT
             per.persona_idpersona              AS id_persona,
             per.persona_tipoident_idtipdoc     AS tipo_documento,
             per.persona_nrodocume              AS numero_documento,
-            licc.licecondu_nrolicenc           AS numero_licencia_conduccion,
-            licc.licecondu_fechexped           AS fecha_expedicion,
-            licc.licecondu_fechvenci           AS fecha_vencimiento,
-            licc.licecondu_estliccon_nombre    AS estado_licencia_conduccion,
-            licc.licecondu_categoria_idcategor AS categoria_licencia_conduccion,
-            cat.ceraptcon_categoria            AS cetificado_enseñanza
+            catl.catliccon_categoria_idcategor AS categoria
         FROM
-                 runtprod.ev_liceinstr ins
-            INNER JOIN runtprod.tr_persnatur natur ON ( ins.liceinstr_persnatur_idpersona = natur.persnatur_persona_idpersona )
-            INNER JOIN runtprod.ev_licecondu licc ON ( ins.liceinstr_licecondu_nrolicenc = licc.licecondu_nrolicenc )
-            INNER JOIN runtprod.tr_persona   per ON ( natur.persnatur_persona_idpersona = per.persona_idpersona )
-            INNER JOIN runtprod.re_ceraptcon cat ON ( licc.licecondu_certensen_nrocerens = cat.ceraptcon_nrocertif )
+                 runtprod.tr_persona per
+            JOIN runtprod.ev_licecondu lic ON lic.licecondu_persnatur_idpersona = per.persona_idpersona
+            LEFT JOIN runtprod.rc_catliccon catl ON catl.catliccon_licecondu_nrolicenc = lic.licecondu_nrolicenc
         WHERE
-                ins.liceinstr_estliccon_nombinstr = 'ACTIVA'
-            AND licc.licecondu_estliccon_nombre = 'CANCELADA'
-            AND per.persona_estaperso_nombre = 'ACTIVA'
-            AND licc.licecondu_fechvenci > sysdate
-            AND cat.ceraptcon_categoria IS NOT NULL
-            AND licc.licecondu_categoria_idcategor IS NOT NULL
-            AND ROWNUM <= 1
-        ORDER BY
-            per.persona_idpersona`,
+            licecondu_persnatur_idpersona NOT IN (
+                SELECT
+                    licecondu_persnatur_idpersona
+                FROM
+                    runtprod.ev_licecondu
+                WHERE
+                    licecondu_estliccon_nombre = 'ACTIVA'
+            )
+            AND lic.licecondu_estliccon_nombre <> 'ACTIVA'
+            AND catl.catliccon_categoria_idcategor IS NOT NULL
+            AND lic.licecondu_categoria_idcategor IS NOT NULL
+            AND ROWNUM <= 1`,
         }).then(registro => {
             tipoDocumento = registro.rows[0]['TIPO_DOCUMENTO'];
             numeroDocumento = registro.rows[0]['NUMERO_DOCUMENTO'];
-            categoriaLicencia = registro.rows[0]['CATEGORIA_LICENCIA_CONDUCCION'];
+            categoriaLicencia = registro.rows[0]['CATEGORIA'];
         })
     }
 
-    // Consultando en la base de datos el instructor - Licencia no activa
+    // Consultando instructor - Licencia no vigente
     static consultarIntructorConLicenciaConduccionVencida() {
-        return cy.task('ejecutar_query_oracle', {
-            statement: `SELECT DISTINCT
+        cy.task('ejecutar_query_oracle', {
+            statement: `
+        SELECT
             per.persona_idpersona              AS id_persona,
             per.persona_tipoident_idtipdoc     AS tipo_documento,
             per.persona_nrodocume              AS numero_documento,
-            licc.licecondu_nrolicenc           AS numero_licencia_conduccion,
-            licc.licecondu_fechexped           AS fecha_expedicion,
-            licc.licecondu_fechvenci           AS fecha_vencimiento,
-            licc.licecondu_estliccon_nombre    AS estado_licencia_conduccion,
-            licc.licecondu_categoria_idcategor AS categoria_licencia_conduccion,
-            cat.ceraptcon_categoria            AS cetificado_enseñanza
+            catl.catliccon_categoria_idcategor AS categoria
         FROM
-                 runtprod.ev_liceinstr ins
-            INNER JOIN runtprod.tr_persnatur natur ON ( ins.liceinstr_persnatur_idpersona = natur.persnatur_persona_idpersona )
-            INNER JOIN runtprod.ev_licecondu licc ON ( ins.liceinstr_licecondu_nrolicenc = licc.licecondu_nrolicenc )
-            INNER JOIN runtprod.tr_persona   per ON ( natur.persnatur_persona_idpersona = per.persona_idpersona )
-            INNER JOIN runtprod.re_ceraptcon cat ON ( licc.licecondu_certensen_nrocerens = cat.ceraptcon_nrocertif )
+                 runtprod.tr_persona per
+            JOIN runtprod.ev_licecondu lic ON lic.licecondu_persnatur_idpersona = per.persona_idpersona
+            LEFT JOIN runtprod.rc_catliccon catl ON catl.catliccon_licecondu_nrolicenc = lic.licecondu_nrolicenc
         WHERE
-                ins.liceinstr_estliccon_nombinstr = 'ACTIVA'
-            AND licc.licecondu_estliccon_nombre = 'ACTIVA'
-            AND per.persona_estaperso_nombre = 'ACTIVA'
-            AND licc.licecondu_fechvenci < sysdate
-            AND cat.ceraptcon_categoria IS NOT NULL
-            AND licc.licecondu_categoria_idcategor IS NOT NULL
-            AND ROWNUM <= 1
-        ORDER BY
-            per.persona_idpersona`,
+            lic.licecondu_estliccon_nombre IN ( 'ACTIVA' )
+            AND NOT ( lic.licecondu_fechvenci > sysdate
+                  OR catl.catliccon_fechvenci > sysdate )
+            AND catl.catliccon_categoria_idcategor IS NOT NULL
+            AND lic.licecondu_categoria_idcategor IS NOT NULL
+            AND ROWNUM <= 1`,
         }).then(registro => {
             tipoDocumento = registro.rows[0]['TIPO_DOCUMENTO'];
             numeroDocumento = registro.rows[0]['NUMERO_DOCUMENTO'];
-            categoriaLicencia = registro.rows[0]['CATEGORIA_LICENCIA_CONDUCCION'];
+            categoriaLicencia = registro.rows[0]['CATEGORIA'];
+        })
+    }
+
+    // Consultando categorías del instructor que no corresponden con las del CEA
+    static consultarCategoriasQueNoCorresponden() {
+        cy.task('ejecutar_query_oracle', {
+            statement: `
+            SELECT DISTINCT
+                ca.catlicins_categoria_idcategor
+            FROM
+                     runtprod.tr_persona pn
+                INNER JOIN runtprod.ev_liceinstr lc ON ( pn.persona_idpersona = lc.liceinstr_persnatur_idpersona )
+                LEFT JOIN runtprod.ev_catlicins ca ON ( lc.liceinstr_nrolicenc = ca.catlicins_liceinstr_nrolicenc )
+            WHERE
+                    1 = 1
+                AND pn.persona_tipoident_idtipdoc = 'C'
+                AND pn.persona_nrodocume = '${numeroDocumento}'
+                AND LICEINSTR_ESTLICCON_NOMBRE = 'ACTIVA'
+                AND LICEINSTR_FECHVENCI >= sysdate
+            ORDER BY
+                catlicins_categoria_idcategor DESC`,
+        }).then(consulta => {
+            let registros = consulta.rows;
+            registros.forEach(element => {
+                categoriasInstructor.push(element['CATLICINS_CATEGORIA_IDCATEGOR']);
+            });
+            cy.task('ejecutar_query_oracle', {
+                statement: `
+            SELECT DISTINCT
+                categorialic_des_categoria
+            FROM
+                     cswhabilitacionpnj.rp_solicitud
+                INNER JOIN cswhabilitacionpnj.rp_cea ON ( cea_id = fk_cea_id )
+                INNER JOIN cswhabilitacionpnj.rp_categorialic ON ( fk_categoriacea_id = cea_id )
+            WHERE
+                    1 = 1
+                AND solicitud_id = '955'`,
+            }).then(consulta => {
+                let registros = consulta.rows;
+                registros.forEach(element => {
+                    categoriasCea.push(element['CATEGORIALIC_DES_CATEGORIA']);
+                });
+                categoriasInstructor.forEach(element => {
+                    if(!(categoriasCea.includes(element))) {
+                        categoriasQueNoCorresponden.push(element)
+                    }
+                })
+            })
         })
     }
 
@@ -208,18 +228,22 @@ export class ValidarLicenciaInstructor {
         expect(respuesta.body['mensaje']).to.eq(null);
     }
 
+    // Validación del mensaje de la causal de rechazo: Sin licencia
     static valdiarMensajeSinLicencia() {
         expect(respuesta.body['mensaje']).to.eq(`El instructor identificado con ${tipoDocumento}. ${numeroDocumento} no tiene registrada una licencia de conducción.`);
     }
 
+    // Validación del mensaje de la causal de rechazo: Licencia no activa
     static validarMesajeLicenciaNoActiva() {
         expect(respuesta.body['mensaje']).to.eq(`El instructor identificado con C${numeroDocumento} tiene registrada una licencia de conducción en estado diferente a Activo para la categoría [${categoriaLicencia}].`);
     }
 
+    // Validación del mensaje de la causal de rechazo: Licencia vencida
     static validarMesajeLicenciaVencida() {
-        expect(respuesta.body['mensaje']).to.eq(`La categoría [${categoriaLicencia}] de la licencia de conducción del instructor identificado con ${tipoDocumento}${numeroDocumento} no se encuentra Vigente.`);
+        expect(respuesta.body['mensaje']).to.eq(`La categoría ${categoriaLicencia} de la licencia de conducción del instructor identificado con ${tipoDocumento}${numeroDocumento} no se encuentra Vigente.`);
     }
 
+    // Validación del mensaje de la causal de rechazo: Las categorías no corresponden
     static validarMesajeCategorias() {
         expect(respuesta.body['mensaje']).to.eq(`La categoría de la licencia de conducción del instructor identificado con C${numeroDocumento} no se encuentra dentro de las categorías seleccionadas para el instructor`);
     }

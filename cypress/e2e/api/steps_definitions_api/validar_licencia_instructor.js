@@ -11,7 +11,7 @@ Given("Que se tiene el tipo de documento, numero de documento y categoría de la
 });
 
 When("Se ejecuta el servicio validar licencia conduccion con el tipo de documento, número de documento y categoría de la licencia de conduccion", () => {
-    ValidarLicenciaInstructor.consumirServicioValidarIntructorConLicencia();
+    ValidarLicenciaInstructor.consumirServicioValidarIntructor();
 });
 
 Then("El codigo de estado debe ser igual a 200", () => {
@@ -33,7 +33,7 @@ Given("Que se tiene el tipo de documento y numero de documento de un instructor 
 });
 
 When("Se ejecuta el servicio validar licencia conduccion con el tipo de documento y número de documento", () => {
-    ValidarLicenciaInstructor.consumirServicioValidarInstructorSinLicencia();
+    ValidarLicenciaInstructor.consumirServicioValidarIntructor();
 });
 
 Then("El mensaje de la causal de rechazo debe ser diferente de null y debe ser el correspondiente", () => {
@@ -48,7 +48,6 @@ Given("Que se tiene el tipo de documento, numero de documento y categoría de la
 Then("El mensaje de la causal de rechazo debe ser diferente de null y debe ser el correspondiente al estado no activo", () => {
     ValidarLicenciaInstructor.validarMesajeLicenciaNoActiva();
 });
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Given("Que se tiene el tipo de documento, numero de documento y categoría de la licencia de conduccion que este vigente", () => {
     ValidarLicenciaInstructor.consultarIntructorConLicenciaConduccionVencida();
