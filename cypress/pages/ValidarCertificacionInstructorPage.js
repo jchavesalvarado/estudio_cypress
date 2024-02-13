@@ -2,6 +2,8 @@ const Ajv = require("ajv");
 let tipo_documento;
 let numero_documento;
 let respuesta;
+let cantidadInicialDeRegistros;
+let cantidadFinalDeRegistros;
 const schema = {
     type: 'object', properties: {
         codigoRespuesta: {type: 'string'},
@@ -29,6 +31,34 @@ export class ValidarCertificacionInstructor {
             tipo_documento = registros.rows[0]['PERSONA_TIPOIDENT_IDTIPDOC'];
             numero_documento = registros.rows[0]['PERSONA_NRODOCUME'];
         })
+    }
+
+    static consultarCantidadInicialDeRegistrosTablaLog() {
+        cy.task('ejecutar_query_oracle', {
+            statement: `SELECT *
+                            FROM CSWHABILITACIONPNJ.GE_LOGVALIDA
+                            WHERE LOGVALIDA_TIPOVALID_CODVALIDA = 'CUR01617'
+                              AND TRUNC(LOGVALIDA_FECHORA) = TO_DATE(sysdate, 'DD/MM/YY')
+                            ORDER BY LOGVALIDA_FECHORA desc`
+        }).then(registros => {
+            cantidadInicialDeRegistros = registros.rows.length
+        })
+    }
+
+    static consultarCantidadFinalDeRegistrosTablaLog() {
+        cy.task('ejecutar_query_oracle', {
+            statement: `SELECT *
+                            FROM CSWHABILITACIONPNJ.GE_LOGVALIDA
+                            WHERE LOGVALIDA_TIPOVALID_CODVALIDA = 'CUR01617'
+                              AND TRUNC(LOGVALIDA_FECHORA) = TO_DATE(sysdate, 'DD/MM/YY')
+                            ORDER BY LOGVALIDA_FECHORA desc`
+        }).then(registros => {
+            cantidadFinalDeRegistros = registros.rows.length
+        })
+    }
+
+    static validarRegistroLogEnLaBaseDeDatos() {
+        expect(cantidadFinalDeRegistros).to.eq(cantidadInicialDeRegistros + 1, `Se registró correctamente el log en la base de datos correspondiente a la notificación CUR01515`)
     }
 
     static consultarInstructorSinCertificacion() {

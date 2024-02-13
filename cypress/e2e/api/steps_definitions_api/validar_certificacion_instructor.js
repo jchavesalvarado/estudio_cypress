@@ -10,6 +10,10 @@ Given("Que se tiene el tipo de documento y numero de documento de un instructor 
     ValidarCertificacionInstructor.consultarInstructorConCertificacion();
 });
 
+Given("Se revisa la tabla de donde se guarda el log para mirar la cantidad de registros antes de consumir el servicio validar certificación", () => {
+    ValidarCertificacionInstructor.consultarCantidadInicialDeRegistrosTablaLog();
+});
+
 When("Se ejecuta el servicio validar certificación instructor con el tipo de documento y número de documento", () => {
     ValidarCertificacionInstructor.consumirServicioValidarInstructor();
 });
@@ -24,6 +28,14 @@ Then("El mensaje de la causal de rechazo del servicio consumido debe ser igual a
 
 Then("El esquema de la respuesta el servicio consumido debe ser el correcto", () => {
     ValidarCertificacionInstructor.validarSchemaRespuesta();
+});
+
+Then("Se revisa la tabla de donde se guarda el log para mirar la cantidad de registros al consumir el servicio validar certificación", () => {
+    ValidarCertificacionInstructor.consultarCantidadInicialDeRegistrosTablaLog();
+});
+
+Then("Se debe registrar correctamente el log del caso de uso en la base de datos al ejecutar el caso de uso", () => {
+    ValidarCertificacionInstructor.consultarCantidadFinalDeRegistrosTablaLog();
 });
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Given("Que se tiene el tipo de documento y numero de documento de un instructor registrado y activo en el Runt sin una certificación asociada", () => {
