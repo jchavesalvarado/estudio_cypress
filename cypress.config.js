@@ -3,7 +3,9 @@ const createBundler = require("@bahmutov/cypress-esbuild-preprocessor");
 const preprocessor = require("@badeball/cypress-cucumber-preprocessor");
 const createEsbuildPlugin = require("@badeball/cypress-cucumber-preprocessor/esbuild");
 const { cargar_plugin_oracle } = require("./cypress/database/oracle_runt");
+const allureWriter = require('@shelex/cypress-allure-plugin/writer');
 require('dotenv').config()
+const fs = require('fs');
 
 // Configuración de los plugins
 async function setupNodeEvents(on, config) {
@@ -16,7 +18,13 @@ async function setupNodeEvents(on, config) {
         })
     );
     // Plugin reportes Cypress
-    require('cypress-mochawesome-reporter/plugin')(on);
+    allureWriter(on, config);
+    on('after:run', (results) => {
+        const data = `Environment=${process.env.ENVIRONMENT}\nBrowser=${results.browserName}\nBrowserVersion=${results.browserVersion}`
+        fs.writeFile('allure-results/environment.properties', data, (err) => {
+          if (err) throw err;
+        });
+      });
     // Plugin task base de datos oracle
     on('task', cargar_plugin_oracle(config));
     // Retornando la configuración.
@@ -29,6 +37,8 @@ module.exports = defineConfig({
         specPattern: "cypress/e2e/**/*.feature",
         chromeWebSecurity: false,
         taskTimeout: 1800000,
+        allureReuseAfterSpec: true,
+        allure: true
     },
     env: {
         DB_USER_DESARUNT: process.env.USER_DESARUNT,

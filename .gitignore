@@ -7,8 +7,10 @@
 
 cypress/results/*
 cypress/reports/*
+cypress/reports/*
 cypress/screenshots/*
-cypress/videos/*
+allure-report/*
+allure-results/*
 
 ### Linux ###
 *~
