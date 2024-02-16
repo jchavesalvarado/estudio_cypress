@@ -36,6 +36,7 @@ module.exports = defineConfig({
         setupNodeEvents,
         specPattern: "cypress/e2e/**/*.feature",
         chromeWebSecurity: false,
+        fixturesFolder: "cypress/fixtures",
         taskTimeout: 1800000,
         allureReuseAfterSpec: true,
         allure: true
