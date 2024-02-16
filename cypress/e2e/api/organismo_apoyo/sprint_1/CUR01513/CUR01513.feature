@@ -13,7 +13,7 @@ Feature: CURO1513 Validar Color CEA
  
       #Este caso hace referemncia al caso de prueba 2 donde comprobaremos que un vehiculo para un OA de tipo CEA no cumpla con los colores establecidos en la parametrizacion.
  
-    @EscenarioDePrueba1
+    @EscenarioDePrueba2
     Scenario: EP2_CC0001_RNPNJ: El vehiculo no cumple con el color
         Given Actualizo la placa para que no cumpla validaciones
         And   Y capturo data de la placa para el servicio
