@@ -27,7 +27,7 @@ let ButtonFechaFin = '#fechaFin';
 let ButtonDiaFechaFin = "button[aria-label='28 de febrero de 2024'] div[class='mat-calendar-body-cell-content mat-focus-indicator']";
 let buttonAdjuntar = '#archivo';
 let ButtonGuardar = ' Guardar ';
-let RutaScript = "cypress/Scripts/FirmaCentralizada";
+let RutaScript = "cypress/scripts/FirmaCentralizada";
 
 class ClasesContratoSICOV {
 
@@ -127,7 +127,7 @@ class ClasesContratoSICOV {
     }
 
     static Valido_button_guardar(){
-        cy.contains(ButtonGuardar).click()
+        cy.contains(ButtonGuardar).click({ force: true })
         cy.wait(5000)
         cy.exec(RutaScript).then((result) => {
             if(result.code === 0){
