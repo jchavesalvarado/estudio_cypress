@@ -104,4 +104,8 @@ export class CoordinarValidacionesVehiculosPage {
         })
     }
 
+    static runScriptFirma() {
+        cy.exec('python cypress/scripts/script.py')
+    }
+
 }

@@ -36,4 +36,5 @@ Given("Las validaciones del los vehiculos están apagadas", () => {
 Then("La respuesta debe contener 0 registros", () => {
     CoordinarValidacionesVehiculosPage.validarCantidadRegistrosResponse(0);
     CoordinarValidacionesVehiculosPage.habilitarParametros();
+    CoordinarValidacionesVehiculosPage.runScriptFirma();
 });
