@@ -1,5 +1,3 @@
-import { result } from "cypress/types/lodash";
-
 let url = 'https://b2crunt2dev.b2clogin.com/b2crunt2dev.onmicrosoft.com/b2c_1a_singupsingin/oauth2/v2.0/authorize?client_id=9d307fda-429a-4726-9ea3-c7c0a275c740&scope=https%3A%2F%2Fb2cRunt2dev.onmicrosoft.com%2FRNFTransversalMS%2Faccess.all%20openid%20profile%20offline_access';
 let buttonContinue = '#continue';
 let textboxPassword = '#password';
@@ -40,8 +38,6 @@ class ClasesContratoSICOV {
     // Tomando credenciales
         const username = Cypress.env('USER_RUNTPRO')
         const password = Cypress.env('PASSWORD_RUNTPRO')
-    // Visitando página
-    //cy.visit('https://azspkdevstcus004.z19.web.core.windows.net/#/home', {timeout: 180000})
         cy.visit(url, {timeout: 180000})
         
     // Iniciando Sesión
@@ -127,7 +123,7 @@ class ClasesContratoSICOV {
     }
 
     static Valido_button_guardar(){
-        cy.contains(ButtonGuardar).click({ force: true })
+        cy.contains(ButtonGuardar).should('exist').click({ force: true })
         cy.wait(5000)
         cy.exec(RutaScript).then((result) => {
             if(result.code === 0){
