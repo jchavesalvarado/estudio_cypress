@@ -1,3 +1,5 @@
+import { result } from "cypress/types/lodash";
+
 let url = 'https://b2crunt2dev.b2clogin.com/b2crunt2dev.onmicrosoft.com/b2c_1a_singupsingin/oauth2/v2.0/authorize?client_id=9d307fda-429a-4726-9ea3-c7c0a275c740&scope=https%3A%2F%2Fb2cRunt2dev.onmicrosoft.com%2FRNFTransversalMS%2Faccess.all%20openid%20profile%20offline_access';
 let buttonContinue = '#continue';
 let textboxPassword = '#password';
@@ -25,6 +27,7 @@ let ButtonFechaFin = '#fechaFin';
 let ButtonDiaFechaFin = "button[aria-label='28 de febrero de 2024'] div[class='mat-calendar-body-cell-content mat-focus-indicator']";
 let buttonAdjuntar = '#archivo';
 let ButtonGuardar = ' Guardar ';
+let RutaScript = "cypress/Scripts/FirmaCentralizada";
 
 class ClasesContratoSICOV {
 
@@ -124,7 +127,16 @@ class ClasesContratoSICOV {
     }
 
     static Valido_button_guardar(){
-        cy.contains(ButtonGuardar).should('exist')
+        cy.contains(ButtonGuardar).click()
+        cy.wait(5000)
+        cy.exec(RutaScript).then((result) => {
+            if(result.code === 0){
+                cy.log('La ejecucion del script para firmar fue exitosa')
+            } else {
+                cy.log('la ejecucucion fallo')
+            }
+        })
+
     }
 }
 
