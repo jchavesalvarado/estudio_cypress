@@ -1,5 +1,6 @@
 let cantida_registros;
 let data_veiculos_color;
+
 const Ajv = require("ajv");
  
 const schema = {
@@ -65,7 +66,27 @@ class pruebas{
             expect(response.body[0]['respuestaValidacion']["mensaje"]).to.eq(null)
         })
     }
- 
+ //  expect(response.body[0]['respuestaValidacion']["exitoso"]).to.eq(true)
+ //expect(response.body[0]['respuestaValidacion']["mensaje"]).to.eq(null)
+
+ static EjecutarServicio1() {
+    cy.request({
+        method: 'POST',
+        url: 'https://az-hub-dev-apim-dev-cus-000.azure-api.net/OAValidacionesMS/validar/validacionColorCea',
+        body: {
+            "idSolicitud": 37,
+            "placa": [
+                data_veiculos_color['AUTOMOTOR_PLACA_NUMPLACA']]
+        }
+    }).then(response => {
+        expect(response.status).to.eq(200)
+        expect(response.body[0]['respuestaValidacion']["exitoso"]).to.eq(false)
+        expect(response.body[0]['respuestaValidacion']["mensaje"]).to.eq(`El color del vehículo con placa ${data_veiculos_color['AUTOMOTOR_PLACA_NUMPLACA']} no corresponde con el parametrizado en el si stema para impartir instrucción en un CEA.`)
+    })
+}
+       
+    
+
     static CompararDataLog() {
           cy.task('ejecutar_query_oracle', {
             statement: `SELECT *
@@ -79,16 +100,16 @@ class pruebas{
     }
  
     static CompararDataLog2() {
-        cy.task('ejecutar_query_oracle', {
-          statement: `SELECT *
-                      FROM CSWHABILITACIONPNJ.GE_LOGVALIDA
-                      WHERE LOGVALIDA_TIPOVALID_CODVALIDA = 'CUR01513'
+            cy.task('ejecutar_query_oracle', {
+            statement: `SELECT *
+                        FROM CSWHABILITACIONPNJ.GE_LOGVALIDA
+                        WHERE LOGVALIDA_TIPOVALID_CODVALIDA = 'CUR01513'
                         AND TRUNC(LOGVALIDA_FECHORA) = TO_DATE(sysdate, 'DD/MM/YY')
-                      ORDER BY LOGVALIDA_FECHORA desc`,
-      }).then(resultados => {
-          expect(resultados.rows.length, "Se registro correctamente el log en BD").to.eq(cantida_registros + 2)
-      })    
-  }
+                        ORDER BY LOGVALIDA_FECHORA desc`,
+        }).then(resultados => {
+            expect(resultados.rows.length, "Se registro correctamente el log en BD").to.eq(cantida_registros + 2)
+        })    
+    }
  
     static ActualizandoData() {
         cy.task('ejecutar_query_oracle', {

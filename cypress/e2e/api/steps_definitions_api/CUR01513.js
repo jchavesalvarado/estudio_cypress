@@ -16,6 +16,7 @@ Given("Y capturo data de la placa para el servicio", () => {
 When("Ejecuto el servicio y valido su respuesta.", () => {
     pruebas.EjecutarServicio()
 })
+
  
 Then("Valido la informacion del log luego de la ejecucion del servicio.", () => {
     pruebas.CompararDataLog()
@@ -29,11 +30,10 @@ Given("Y capturo data de la placa para el servicio", () => {
 })
  
 When("Ejecuto el servicio y valido su respuesta.", () => {
-    pruebas.EjecutarServicio()
-})
+    pruebas.EjecutarServicio1()
+})})
  
 Then("Valido la informacion del log luego de la ejecucion del servicio para este caso.", () => {
     pruebas.CompararDataLog2()
     })
  
-})
