@@ -25,7 +25,7 @@ let ButtonFechaFin = '#fechaFin';
 let ButtonDiaFechaFin = "button[aria-label='28 de febrero de 2024'] div[class='mat-calendar-body-cell-content mat-focus-indicator']";
 let buttonAdjuntar = '#archivo';
 let ButtonGuardar = ' Guardar ';
-let RutaScript = "cypress/scripts/FirmaCentralizada";
+let RutaScript = Cypress.env('EXECUTABLE_PATH');
 
 class ClasesContratoSICOV {
 
@@ -98,7 +98,7 @@ class ClasesContratoSICOV {
             statement: "SELECT SOLICITUD_ID, SOLICITUD_TIPO_DOCUMENTO, SOLICITUD_NUM_DOCUMENTO, ESTABLECI_MAT_MERCANTIL, FK_DIVIPOLA_OT FROM CSWHABILITACIONPNJ.RP_SOLICITUD WHERE NOT EXISTS (SELECT NULL FROM CSWHABILITACIONPNJ.RP_SICOV WHERE FK_ID_SOLICITUD = SOLICITUD_ID) AND FK_TIPOPRESTADOR_ID = 11 AND SOLICITUD_ESTADO = 'APROBADA'AND ESTABLECI_MAT_MERCANTIL IS NOT NULL OR FK_DIVIPOLA_OT IS NOT NULL"
         }).then((response) => {
             
-             dataNIT = response.rows[17].SOLICITUD_NUM_DOCUMENTO
+             dataNIT = response.rows[21].SOLICITUD_NUM_DOCUMENTO
         })
     }
 
@@ -125,14 +125,24 @@ class ClasesContratoSICOV {
     static Valido_button_guardar(){
         cy.contains(ButtonGuardar).should('exist').click({ force: true })
         cy.wait(5000)
-        cy.exec(RutaScript).then((result) => {
+        cy.contains('Aceptar').click()
+        cy.wait(3000)
+        cy.contains('Aceptar').click()
+        cy.log(RutaScript)
+        cy.wait(5000)
+
+        
+        //{failOnNonZeroExit: false}
+        /*cy.exec(RutaScript).then((result) => {
             if(result.code === 0){
                 cy.log('La ejecucion del script para firmar fue exitosa')
             } else {
                 cy.log('la ejecucucion fallo')
             }
-        })
-
+        })*/    
+    }
+    static runScriptFirma() {
+        cy.exec('python cypress/scripts/script.py')
     }
 }
 

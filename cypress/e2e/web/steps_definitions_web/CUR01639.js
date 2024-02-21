@@ -27,4 +27,5 @@ When('lleno todos los campos del registro SICOV', () => {
 
 Then('Valido que exista el boton de guardar', () => {
     ClasesContratoSICOV.Valido_button_guardar()
+    ClasesContratoSICOV.runScriptFirma()
 })

@@ -38,6 +38,7 @@ module.exports = defineConfig({
         chromeWebSecurity: false,
         fixturesFolder: "cypress/fixtures",
         taskTimeout: 1800000,
+
         allureReuseAfterSpec: true,
         allure: true
     },
@@ -54,6 +55,7 @@ module.exports = defineConfig({
         PASSWORD_RUNTPRO: process.env.PASSWORD_RUNTPRO,
         SCOPE_RUNTPRO: process.env.SCOPE_RUNTPRO,
         CLIENT_ID_RUNTPRO: process.env.CLIENT_ID_RUNTPRO,
-        TOKEN_AUDIENCE: process.env.TOKEN_AUDIENCE
+        TOKEN_AUDIENCE: process.env.TOKEN_AUDIENCE,
+        'EXECUTABLE_PATH': "C:\\RepoStudio\\estudio_cypress\\cypress\\scripts\\FirmaCentralizada.exe"
       }
 });
