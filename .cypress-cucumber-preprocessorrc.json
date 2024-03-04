@@ -1,6 +1,6 @@
 {
   "stepDefinitions": [
     "cypress/e2e/api/steps_definitions_api/*.js",
-    "cypress/e2e/web/steps_definitions_web/*.js"
+    "cypress/e2e/steps_definitions/*.js"
   ]
 }

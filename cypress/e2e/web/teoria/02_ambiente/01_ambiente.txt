@@ -1,9 +1,0 @@
------------------------------------------------------------------------------------------------------------------------------
-Configuración Inicial
------------------------------------------------------------------------------------------------------------------------------
-* Descargar e instalar nodejs
-* Decargar e instalar visual studio code
-* Crear una nueva carpeta para el proyecto y abrira con visual studio code
-* Abrir una terminal y ejecutar: npm -i init
-* Instalar Cypress: npm install cypress --save -dev
-* Iniciar Cypress: npx cypress open / node_modules/.bin/cypress open
