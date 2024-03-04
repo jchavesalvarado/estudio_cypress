@@ -3,7 +3,7 @@ import {
     When,
     Then,
 } from "@badeball/cypress-cucumber-preprocessor";
-import { ValidarCertificacionInstructor } from "../pages/CUR01617";
+import { ValidarCertificacionInstructor } from "../pages/PageCUR01617";
 
 
 Given("Que se tiene el tipo de documento y numero de documento de un instructor registrado y activo en el Runt con una certificación en estdo activo y vigente", () => {

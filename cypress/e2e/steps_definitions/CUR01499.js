@@ -3,37 +3,37 @@ import {
     When,
     Then,
 } from "@badeball/cypress-cucumber-preprocessor";
-import { CUR01499_Page } from "../pages/CUR01499_Page";
+import { PageCUR01499 } from "../pages/PageCUR01499";
 
 Given("Las validaciones del los vehiculos están encendidas", () => {
-    CUR01499_Page.habilitarParametros();
+    PageCUR01499.habilitarParametros();
 });
 
 Given("Se tiene el número de placa del vehiculo a consultar", () => {
-    CUR01499_Page.consultarPlacaBaseDeDatos();
+    PageCUR01499.consultarPlacaBaseDeDatos();
 });
 
 When("Se ejecuta el servicio coordinar validaciones vehiculo con el numero de placa", () => {
-    CUR01499_Page.consumirServicioCoordinarValidacionesVehiculos();
+    PageCUR01499.consumirServicioCoordinarValidacionesVehiculos();
 });
 
 Then("El codigo de estado debe ser 200", () => {
-    CUR01499_Page.validarStatusCode();
+    PageCUR01499.validarStatusCode();
 });
 
 Then("La respuesta debe contener 6 registros, los cuales corresponden a las validaciones realizadas", () => {
-    CUR01499_Page.validarCantidadRegistrosResponse(7);
+    PageCUR01499.validarCantidadRegistrosResponse(7);
 });
 
 Then("El esquema de la respuesta el servicio es el correcto", () => {
-    CUR01499_Page.ValidarSchemaRespuesta();
+    PageCUR01499.ValidarSchemaRespuesta();
 });
 
 Given("Las validaciones del los vehiculos están apagadas", () => {
-    CUR01499_Page.deshabilitarParametros()
+    PageCUR01499.deshabilitarParametros()
 });
 
 Then("La respuesta debe contener 0 registros", () => {
-    CUR01499_Page.validarCantidadRegistrosResponse(0);
-    CUR01499_Page.habilitarParametros();
+    PageCUR01499.validarCantidadRegistrosResponse(0);
+    PageCUR01499.habilitarParametros();
 });

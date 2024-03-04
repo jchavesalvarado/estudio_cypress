@@ -3,7 +3,7 @@ import {
     When,
     Then,
 } from "@badeball/cypress-cucumber-preprocessor";
-import pruebas from "../pages/CUR01513_Page"
+import pruebas from "../pages/PageCUR01513"
  
 Given("Capturo datos de la tabla log", () => {
     pruebas.ObtenerDataLog()

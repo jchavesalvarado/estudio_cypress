@@ -4,7 +4,7 @@ import {
     When,
     Then,
 } from "@badeball/cypress-cucumber-preprocessor";
-import { ValidarLicenciaInstructor } from "../pages/CUR01515_Page";
+import { ValidarLicenciaInstructor } from "../pages/PageCUR01515";
 
 Given("Que se tiene el tipo de documento, numero de documento y categoría de la licencia de conduccion de un instructor en estado activo y vigente", () => {
     ValidarLicenciaInstructor.consultarIntructorConLicenciaConduccion();

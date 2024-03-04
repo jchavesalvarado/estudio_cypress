@@ -37,8 +37,8 @@ const schema = {
     }
 }
 
-// Clase que contiene métodos necesarios para la validación del caso de uso CUR01499_Page
-export class CUR01499_Page {
+// Clase que contiene métodos necesarios para la validación del caso de uso PageCUR01499
+export class PageCUR01499 {
 
     // Habilitación de los párametros establecidos en la validación de vehículos
     static habilitarParametros() {
