@@ -4,9 +4,10 @@ import {
     Then
 } from "@badeball/cypress-cucumber-preprocessor";
 import ClasesContratoSICOV from "../pages/PageCUR01639";
+import {PageLogin} from "../pages/PageLogin";
  
 Given('Ingreso a la pagina de RUNT', () => {
-    ClasesContratoSICOV.validar_Login_2()
+    PageLogin.validarLogin('ACREDITADOR')
 })
 
 Given('Capturo informacion de el numero de registros SICOV', () => {
