@@ -3,7 +3,7 @@ import {
     When,
     Then,
 } from "@badeball/cypress-cucumber-preprocessor";
-import pruebas from "./../../../pages/CUR01513POM"
+import pruebas from "../../../pages/Validar color del vehículo para un CEApage"
  
 Given("Capturo datos de la tabla log", () => {
     pruebas.ObtenerDataLog()
